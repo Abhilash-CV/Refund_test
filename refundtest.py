@@ -54,9 +54,10 @@ if uploaded_file:
     # ----------------------------------------------------
     # Forfeit calculation
     # ----------------------------------------------------
-   def calculate_forfeit(row):
-        forfeited = 0
+    def calculate_forfeit(row):
 
+        forfeited = 0
+    
         for allot_col in allot_cols:
     
             round_no = allot_col.split("_")[1]
@@ -81,7 +82,7 @@ if uploaded_file:
                             forfeited += float(value)
     
         return forfeited
-
+           
     df["Forfeited_Amount"] = df.apply(calculate_forfeit, axis=1)
 
     # ----------------------------------------------------
