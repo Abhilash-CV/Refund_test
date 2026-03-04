@@ -117,47 +117,47 @@ if uploaded_file:
     df["Refund_Amount"] = df.apply(calculate_refund, axis=1)
     def generate_remark(row):
 
-    total_remitted = row.get("Total_Remitted_Fee",0)
-    forfeited = row.get("Forfeited_Amount",0)
-    refund = row.get("Refund_Amount",0)
-
-    has_allotment = any(
-        pd.notna(row.get(c)) and str(row.get(c)).strip() != ""
-        for c in allot_cols
-    )
-
-    curr_admn = row.get("Curr_Admn")
-
-    # No allotment
-    if not has_allotment:
-        return "No allotment in any round – Full refund"
-
-    # Joined
-    if pd.notna(curr_admn) and str(curr_admn).strip() != "":
-        if forfeited > 0:
-            return "Candidate joined – Refund after forfeiture deduction"
-        else:
-            return "Candidate joined – Full refund"
-
-    # Check join status reasons
-    for allot_col in allot_cols:
-
-        round_no = allot_col.split("_")[1]
-        join_col = f"JoinStatus_{round_no}"
-
-        status = str(row.get(join_col,"")).strip().upper()
-
-        if status == "TC":
-            return f"Allotted in {allot_col} – TC issued – Fee forfeited"
-
-        if status == "N":
-            return f"Allotted in {allot_col} – Non joining – Fee forfeited"
-
-    # fallback
-    if refund == 0 and forfeited > 0:
-        return "Allotted but not joined – Fee forfeited"
-
-    return "Refund processed"
+        total_remitted = row.get("Total_Remitted_Fee",0)
+        forfeited = row.get("Forfeited_Amount",0)
+        refund = row.get("Refund_Amount",0)
+    
+        has_allotment = any(
+            pd.notna(row.get(c)) and str(row.get(c)).strip() != ""
+            for c in allot_cols
+        )
+    
+        curr_admn = row.get("Curr_Admn")
+    
+        # No allotment
+        if not has_allotment:
+            return "No allotment in any round – Full refund"
+    
+        # Joined
+        if pd.notna(curr_admn) and str(curr_admn).strip() != "":
+            if forfeited > 0:
+                return "Candidate joined – Refund after forfeiture deduction"
+            else:
+                return "Candidate joined – Full refund"
+    
+        # Check join status reasons
+        for allot_col in allot_cols:
+    
+            round_no = allot_col.split("_")[1]
+            join_col = f"JoinStatus_{round_no}"
+    
+            status = str(row.get(join_col,"")).strip().upper()
+    
+            if status == "TC":
+                return f"Allotted in {allot_col} – TC issued – Fee forfeited"
+    
+            if status == "N":
+                return f"Allotted in {allot_col} – Non joining – Fee forfeited"
+    
+        # fallback
+        if refund == 0 and forfeited > 0:
+            return "Allotted but not joined – Fee forfeited"
+    
+        return "Refund processed"
     df["Remarks"] = df.apply(generate_remark, axis=1)
     # ----------------------------------------------------
     # Summary metrics
