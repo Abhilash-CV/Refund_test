@@ -54,31 +54,32 @@ if uploaded_file:
     # ----------------------------------------------------
     # Forfeit calculation
     # ----------------------------------------------------
-    def calculate_forfeit(row):
-
+   def calculate_forfeit(row):
         forfeited = 0
 
         for allot_col in allot_cols:
-
+    
             round_no = allot_col.split("_")[1]
             join_col = f"JoinStatus_{round_no}"
-
-            if join_col not in row:
-                continue
-
-            status = str(row.get(join_col, "")).strip().upper()
-
-            if status in ["N", "TC"]:
-
-                mapped_fees = allotment_map.get(allot_col, [])
-
-                for fee_col in set(mapped_fees):
-
-                    value = row.get(fee_col, 0)
-
-                    if pd.notna(value):
-                        forfeited += float(value)
-
+    
+            allot_val = row.get(allot_col)
+            join_status = str(row.get(join_col,"")).strip().upper()
+    
+            # check if allotment exists
+            if pd.notna(allot_val) and str(allot_val).strip() != "":
+    
+                # non join or TC
+                if join_status in ["N","TC"]:
+    
+                    mapped_fees = allotment_map.get(allot_col, [])
+    
+                    for fee_col in mapped_fees:
+    
+                        value = row.get(fee_col,0)
+    
+                        if pd.notna(value):
+                            forfeited += float(value)
+    
         return forfeited
 
     df["Forfeited_Amount"] = df.apply(calculate_forfeit, axis=1)
