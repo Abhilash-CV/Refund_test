@@ -125,11 +125,9 @@ if uploaded_file:
         if refund + forfeited != total_remitted:
             refund = total_remitted - forfeited
     
-        # safety
-        if refund < 0:
-            refund = 0
-    
-        return refund
+       
+        
+        
 
     df["Refund_Amount"] = df.apply(calculate_refund, axis=1)
     def generate_remark(row):
