@@ -95,28 +95,41 @@ if uploaded_file:
 
         total_remitted = row.get("Total_Remitted_Fee", 0)
         forfeited = row.get("Forfeited_Amount", 0)
-
+    
         has_allotment = any(
             pd.notna(row.get(c)) and str(row.get(c)).strip() != ""
             for c in allot_cols
         )
-
+    
         curr_admn = row.get("Curr_Admn")
-
+    
         # Rule 1 : No allotment → Full refund
         if not has_allotment:
-            return total_remitted
-
+            refund = total_remitted
+    
         # Rule 2 : Candidate joined
-        if pd.notna(curr_admn) and str(curr_admn).strip() != "":
-            return total_remitted - forfeited
-
+        elif pd.notna(curr_admn) and str(curr_admn).strip() != "":
+            refund = total_remitted - forfeited
+    
         # Rule 3 : Allotted but not joined
-        if has_allotment and (pd.isna(curr_admn) or str(curr_admn).strip() == ""):
-            return 0
-
-        return 0
-
+        elif has_allotment and (pd.isna(curr_admn) or str(curr_admn).strip() == ""):
+            refund = 0
+    
+        else:
+            refund = 0
+    
+        # -------------------------------------------------
+        # Accounting balance condition (NEW CONDITION)
+        # Ensures Total = Refund + Forfeit
+        # -------------------------------------------------
+        if refund + forfeited != total_remitted:
+            refund = total_remitted - forfeited
+    
+        # safety
+        if refund < 0:
+            refund = 0
+    
+        return refund
 
     df["Refund_Amount"] = df.apply(calculate_refund, axis=1)
     def generate_remark(row):
