@@ -90,26 +90,30 @@ if uploaded_file:
     # ----------------------------------------------------
     def calculate_refund(row):
 
-        total_remitted = row.get("Total_Remitted_Fee",0)
-        forfeited = row.get("Forfeited_Amount",0)
-    
+        total_remitted = row.get("Total_Remitted_Fee", 0)
+        forfeited = row.get("Forfeited_Amount", 0)
+
         has_allotment = any(
             pd.notna(row.get(c)) and str(row.get(c)).strip() != ""
             for c in allot_cols
         )
-    
+
         curr_admn = row.get("Curr_Admn")
-    
-        # Case 1 : No allotment
+
+        # Rule 1 : No allotment → Full refund
         if not has_allotment:
             return total_remitted
-    
-        # Case 2 : Joined
+
+        # Rule 2 : Candidate joined
         if pd.notna(curr_admn) and str(curr_admn).strip() != "":
             return total_remitted - forfeited
-    
-        # Case 3 : Allotted but not joined
-        return total_remitted - forfeited
+
+        # Rule 3 : Allotted but not joined
+        if has_allotment and (pd.isna(curr_admn) or str(curr_admn).strip() == ""):
+            return 0
+
+        return 0
+
 
     df["Refund_Amount"] = df.apply(calculate_refund, axis=1)
     def generate_remark(row):
